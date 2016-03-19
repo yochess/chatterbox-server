@@ -1,0 +1,18 @@
+{
+  "name": "chatterbox",
+  "version": "0.0.1",
+  "main": "server/basic-server.js",
+  "author": "Hack Reactor",
+  "license": "Copyright 2013, Hack Reactor. All rights reserved.",
+  "scripts": {
+    "start": "node server/basic-server.js",
+    "test": "mocha server/spec",
+    "postinstall": "curl -s https://raw.githubusercontent.com/hackreactor-labs/pomander/master/bin/install | bash"
+  },
+  "devDependencies": {
+    "chai": "^1.9.0",
+    "eslint-config-hackreactor": "git://github.com/hackreactor-labs/eslint-config-hackreactor",
+    "mocha": "^1.21.4",
+    "request": "^2.34.0"
+  }
+}
