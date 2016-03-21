@@ -16,52 +16,67 @@ var dataStorage = [];
 var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  // if the request methd is get
-  if (request.method === 'GET') {
+  // Check url routing for classess/message
+  if (request.url === '/classes/messages') {
+    // if the request methd is get
+    if (request.method === 'GET') {
+      // The outgoing status.
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      // create a object
+      var obj = {
+        results: dataStorage
+      };
+      // send it back to the client
+
+      // .writeHead() writes to the request line and headers of the response,
+      // which includes the status and all headers.
+      response.writeHead(statusCode, headers);
+      response.write(JSON.stringify(obj));
+      // Make sure to always call response.end() - Node may not send
+      // anything back to the client until you do. The string you pass to
+      // response.end() will be the body of the response - i.e. what shows
+      // up in the browser.
+      //
+      // Calling .end "flushes" the response's internal buffer, forcing
+      // node to actually send all the data over to the client.
+      response.end();
+    } else if (request.method === 'POST') { // otherwise if it is post
+      // set status to 201 and respond in header
+
+      var statusCode = 201;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+
+      // save data received in obj
+      var body = [];
+      request.on('data', function(chunk) {
+        body.push(chunk);
+      }).on('end', function() {
+        body = Buffer.concat(body).toString();
+        dataStorage.push(JSON.parse(body));
+      });
+
+      // push it to our storage
+
+      // End request
+      response.end();
+
+    }
+  } else {
+    // Set status to 404
+    // Set default header
     // The outgoing status.
-    var statusCode = 200;
+    var statusCode = 404;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'application/json';
-    // create a object
-    var obj = {
-      results: dataStorage
-    };
-    // send it back to the client
 
-    // .writeHead() writes to the request line and headers of the response,
-    // which includes the status and all headers.
-    response.writeHead(statusCode, headers);
-    response.write(JSON.stringify(obj));
-    // Make sure to always call response.end() - Node may not send
-    // anything back to the client until you do. The string you pass to
-    // response.end() will be the body of the response - i.e. what shows
-    // up in the browser.
-    //
-    // Calling .end "flushes" the response's internal buffer, forcing
-    // node to actually send all the data over to the client.
+    // Write the header
+    response.writeHead(statusCode, headers);    
+    // End response
     response.end();
-  } else if (request.method === 'POST') { // otherwise if it is post
-    // set status to 201 and respond in header
-
-    var statusCode = 201;
-    var headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'application/json';
-    response.writeHead(statusCode, headers);
-
-    // save data received in obj
-    var body = [];
-    request.on('data', function(chunk) {
-      body.push(chunk);
-    }).on('end', function() {
-      body = Buffer.concat(body).toString();
-      dataStorage.push(JSON.parse(body));
-    });
-
-    // push it to our storage
-
-    // End request
-    response.end();
-
   }
 };
 
