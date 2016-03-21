@@ -14,7 +14,6 @@ this file and include it in basic-server.js so that it actually works.
 var dataStorage = [];
 
 var requestHandler = function(request, response) {
-  
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // if the request methd is get
@@ -23,10 +22,9 @@ var requestHandler = function(request, response) {
     var statusCode = 200;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'application/json';
-    
     // create a object
     var obj = {
-      results: []
+      results: dataStorage
     };
     // send it back to the client
 
@@ -44,18 +42,26 @@ var requestHandler = function(request, response) {
     response.end();
   } else if (request.method === 'POST') { // otherwise if it is post
     // set status to 201 and respond in header
+
     var statusCode = 201;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'application/json';
     response.writeHead(statusCode, headers);
 
     // save data received in obj
-    var receivedObject = '';
+    var body = [];
+    request.on('data', function(chunk) {
+      body.push(chunk);
+    }).on('end', function() {
+      body = Buffer.concat(body).toString();
+      dataStorage.push(JSON.parse(body));
+    });
+
     // push it to our storage
-    dataStorage.push(receivedObject);
 
     // End request
     response.end();
+
   }
 };
 
