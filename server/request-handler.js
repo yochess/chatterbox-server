@@ -43,15 +43,19 @@ var requestHandler = function(request, response) {
     // node to actually send all the data over to the client.
     response.end();
   } else if (request.method === 'POST') { // otherwise if it is post
-    // set status to 201
+    // set status to 201 and respond in header
     var statusCode = 201;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'application/json';
+    response.writeHead(statusCode, headers);
 
     // save data received in obj
     var receivedObject = '';
     // push it to our storage
     dataStorage.push(receivedObject);
+
+    // End request
+    response.end();
   }
 };
 
