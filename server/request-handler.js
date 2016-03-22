@@ -14,7 +14,35 @@ this file and include it in basic-server.js so that it actually works.
 var dataStorage = [];
 var fs = require('fs');
 var util = require('util');
+var storageFilename = 'storage.txt';
+var loadStorage = function () {
+  var flags = 'r';
 
+  fs.exists(storageFilename, function(exists) {
+    if (exists) {
+      fs.stat(storageFilename, function(err, stats) {
+        fs.open(storageFilename, flags, function(err, fd) {
+          var buffer = new Buffer(stats.size);
+
+          // Read from local file
+          fs.read(fd, buffer, 0, buffer.length, null, function (err, bytesRead, buffer) {
+            if (buffer.length !== 0) {
+              // Use JSON parse to create an array
+              var data = buffer.toString('utf8', 0, buffer.length);
+              // Assign dataStorage to the array
+              dataStorage = JSON.parse(data);
+            }
+            fs.close(fd, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            });
+          });
+        });
+      });
+    }
+  });
+}(); 
 
 var requestHandler = function(request, response) {
   var getFile = function(filename, contentType) {  
@@ -24,7 +52,6 @@ var requestHandler = function(request, response) {
     response.writeHead(statusCode, headers);
 
     fs.stat(filename, function(err, stats) {
-
       if (stats.isFile()) {
         var statsString = util.inspect(stats);
 
@@ -35,17 +62,14 @@ var requestHandler = function(request, response) {
             var data = buffer.toString('utf8', 0, buffer.length);
             response.write(data);   
             response.end();
-            if (bytesRead === buffer.length) {
-            }  
+            
+            fs.close(fd, function(err) {
+              if (err) {
+                console.log(err);
+              } 
+            }); //end fs.read()
           });
-
-              // end the string/data to the client
-          // close file
-          fs.close(fd, function(err) {
-            if (err) {
-              console.log(err);
-            } 
-          }); //end fs.read()
+          
         });//end fs.open() 
       }//end stats.isFile()
     });//end fs.stats()
@@ -125,32 +149,36 @@ var requestHandler = function(request, response) {
       headers['Content-Type'] = 'application/json';
       response.writeHead(statusCode, headers);
 
-      // save data received in obj
       var body = [];
       request.on('data', function(chunk) {
         body.push(chunk);
       }).on('end', function() {
         body = Buffer.concat(body).toString();
         dataStorage.push(JSON.parse(body));
+
+        // If the storage file does not exist
+        fs.open(storageFilename, 'w', function(err, fd) { // Create the file
+          // Append data to storageFile
+          fs.write(fd, JSON.stringify(dataStorage), function(err) {
+            if (err) {
+              console.log(err);
+            }
+            fs.close(fd, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            });
+          });
+        }); 
       });
-
-      // push it to our storage
-
-      // End request
       response.end();
-
     }
   } else {
-    // Set status to 404
-    // Set default header
-    // The outgoing status.
     var statusCode = 404;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'application/json';
 
-    // Write the header
     response.writeHead(statusCode, headers);    
-    // End response
     response.end();
   }
 };
