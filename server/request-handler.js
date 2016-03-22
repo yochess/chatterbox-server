@@ -17,7 +17,7 @@ var requestHandler = function(request, response) {
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
   // Check url routing for classess/message
-  if (request.url.match(/^\/classes\/messages\//)) {
+  if (request.url.match(/^\/classes\/messages/)) {
     // if the request methd is get
     if (request.method === 'GET' || request.method === 'OPTIONS') {
       // The outgoing status.
@@ -111,12 +111,12 @@ var requestHandlerStub = function(request, response) {
       request.on('data', function(chunk) {
         body.push(chunk);
       });
-      request.on('end', function() {
+      request.on('end', function(chunk) {
         body = Buffer.concat(body).toString();
         dataStorage.push(JSON.parse(body));
       });
       // End request
-      response.end();
+      response.end('Success');
 
     }
   } else if (request.url === '/classes/room') {
