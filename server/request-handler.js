@@ -80,6 +80,61 @@ var requestHandler = function(request, response) {
   }
 };
 
+
+var requestHandlerStub = function(request, response) {
+  // Check url routing for classess/message
+  if (request.url === '/classes/messages') {
+    // if the request methd is get
+    if (request.method === 'GET') {
+      // The outgoing status.
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      // create a object
+      var obj = {
+        results: dataStorage
+      };
+      
+      response.writeHead(statusCode, headers);
+      //response.write(JSON.stringify(obj));
+      response.end(JSON.stringify(obj));
+    } else if (request.method === 'POST') { // otherwise if it is post
+      // set status to 201 and respond in header
+
+      var statusCode = 201;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+
+      // save data received in obj
+      var body = [];
+      request.on('data', function(chunk) {
+        body.push(chunk);
+      }).on('end', function() {
+        body = Buffer.concat(body).toString();
+        dataStorage.push(JSON.parse(body));
+      });
+
+      // push it to our storage
+
+      // End request
+      response.end();
+
+    }
+  } else {
+    // Set status to 404
+    // Set default header
+    // The outgoing status.
+    var statusCode = 404;
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = 'application/json';
+
+    // Write the header
+    response.writeHead(statusCode, headers);    
+    // End response
+    response.end();
+  }
+};
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
 // are on different domains, for instance, your chat client.
@@ -96,4 +151,5 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-module.exports = requestHandler;
+exports.requestHandler = requestHandlerStub;
+exports.handler = requestHandler;
