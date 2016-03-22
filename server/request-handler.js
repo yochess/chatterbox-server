@@ -14,12 +14,12 @@ this file and include it in basic-server.js so that it actually works.
 var dataStorage = [];
 
 var requestHandler = function(request, response) {
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
+  console.log('Serving request type ' + request.method + ' for url ' + request.url);
   // Check url routing for classess/message
-  if (request.url === '/classes/messages') {
+  if (request.url.match(/^\/classes\/messages\//)) {
     // if the request methd is get
-    if (request.method === 'GET') {
+    if (request.method === 'GET' || request.method === 'OPTIONS') {
       // The outgoing status.
       var statusCode = 200;
       var headers = defaultCorsHeaders;
