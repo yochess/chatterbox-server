@@ -51,28 +51,32 @@ var requestHandler = function(request, response) {
     headers['Content-Type'] = contentType;
     response.writeHead(statusCode, headers);
 
-    fs.stat(filename, function(err, stats) {
-      if (stats.isFile()) {
-        var statsString = util.inspect(stats);
+    fs.exists(storageFilename, function(exists) {
+      if (exists) {
+        fs.stat(filename, function(err, stats) {
+          if (stats.isFile()) {
+            var statsString = util.inspect(stats);
 
-        fs.open(filename, flags, function(err, fd) {
-          var buffer = new Buffer(stats.size);
+            fs.open(filename, flags, function(err, fd) {
+              var buffer = new Buffer(stats.size);
 
-          fs.read(fd, buffer, 0, buffer.length, null, function(err, bytesRead, buffer) {
-            var data = buffer.toString('utf8', 0, buffer.length);
-            response.write(data);   
-            response.end();
-            
-            fs.close(fd, function(err) {
-              if (err) {
-                console.log(err);
-              } 
-            }); //end fs.read()
-          });
-          
-        });//end fs.open() 
-      }//end stats.isFile()
-    });//end fs.stats()
+              fs.read(fd, buffer, 0, buffer.length, null, function(err, bytesRead, buffer) {
+                var data = buffer.toString('utf8', 0, buffer.length);
+                response.write(data);   
+                response.end();
+                
+                fs.close(fd, function(err) {
+                  if (err) {
+                    console.log(err);
+                  } 
+                }); //end fs.read()
+              });
+              
+            });//end fs.open() 
+          }//end stats.isFile()
+        });//end fs.stats()
+      }
+    });
   };
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
@@ -114,7 +118,7 @@ var requestHandler = function(request, response) {
     var flags = 'r';
 
     //send html data back to the client
-    getFile(filename, 'images/gif');
+    getFile(filename, 'image/gif');
 
   } else if (request.url.match(/^\/classes\/messages/)) {
     // if the request methd is get
