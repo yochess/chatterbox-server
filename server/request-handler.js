@@ -12,12 +12,87 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var dataStorage = [];
+var fs = require('fs');
+var util = require('util');
+
 
 var requestHandler = function(request, response) {
+  var getFile = function(filename, contentType) {  
+    var statusCode = 200;
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = contentType;
+    response.writeHead(statusCode, headers);
 
+    fs.stat(filename, function(err, stats) {
+
+      if (stats.isFile()) {
+        var statsString = util.inspect(stats);
+
+        fs.open(filename, flags, function(err, fd) {
+          var buffer = new Buffer(stats.size);
+
+          fs.read(fd, buffer, 0, buffer.length, null, function(err, bytesRead, buffer) {
+            var data = buffer.toString('utf8', 0, buffer.length);
+            response.write(data);   
+            response.end();
+            if (bytesRead === buffer.length) {
+            }  
+          });
+
+              // end the string/data to the client
+          // close file
+          fs.close(fd, function(err) {
+            if (err) {
+              console.log(err);
+            } 
+          }); //end fs.read()
+        });//end fs.open() 
+      }//end stats.isFile()
+    });//end fs.stats()
+  };
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  // Check url routing for classess/message
-  if (request.url.match(/^\/classes\/messages/)) {
+
+  //if the request url is "/"
+  if (request.url === '/') {
+    //open the index.html file in the client folder
+    var filename = '../client/index.html';
+    var flags = 'r';
+
+    //send html data back to the client
+    getFile(filename, 'text/html');
+  
+  } else if (request.url.match(/^\/styles/)) {
+    var filename = '../client' + request.url;
+    var flags = 'r';
+
+    //send html data back to the client
+    getFile(filename, 'text/css');
+
+
+
+
+  } else if (request.url.match(/^\/bower_components/)) {
+    var filename = '../client' + request.url;
+    var flags = 'r';
+
+    //send html data back to the client
+    getFile(filename, 'application/javascript');
+
+  } else if (request.url.match(/^\/scripts/)) {
+    var filename = '../client' + request.url;
+    var flags = 'r';
+
+    //send html data back to the client
+    getFile(filename, 'application/javascript');
+
+  } else if (request.url.match(/^\/images/)) {
+    var filename = '../client' + request.url;
+    var flags = 'r';
+
+    //send html data back to the client
+    getFile(filename, 'images/gif');
+
+  } else if (request.url.match(/^\/classes\/messages/)) {
     // if the request methd is get
     if (request.method === 'GET' || request.method === 'OPTIONS') {
       // The outgoing status.
