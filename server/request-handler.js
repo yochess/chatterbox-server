@@ -110,13 +110,47 @@ var requestHandlerStub = function(request, response) {
       var body = [];
       request.on('data', function(chunk) {
         body.push(chunk);
-      }).on('end', function() {
+      });
+      request.on('end', function() {
         body = Buffer.concat(body).toString();
         dataStorage.push(JSON.parse(body));
       });
+      // End request
+      response.end();
 
-      // push it to our storage
+    }
+  } else if (request.url === '/classes/room') {
+    // if the request methd is get
+    if (request.method === 'GET') {
+      // The outgoing status.
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      // create a object
+      var obj = {
+        results: dataStorage
+      };
+      
+      response.writeHead(statusCode, headers);
+      //response.write(JSON.stringify(obj));
+      response.end(JSON.stringify(obj));
+    } else if (request.method === 'POST') { // otherwise if it is post
+      // set status to 201 and respond in header
 
+      var statusCode = 201;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+
+      // save data received in obj
+      var body = [];
+      request.on('data', function(chunk) {
+        body.push(chunk);
+      });
+      request.on('end', function() {
+        body = Buffer.concat(body).toString();
+        dataStorage.push(JSON.parse(body));
+      });
       // End request
       response.end();
 
