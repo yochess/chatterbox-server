@@ -20,18 +20,6 @@ app.route('/classes/messages')
     res.status(201).end();
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
 app.listen(3000, function() {
 
 });
