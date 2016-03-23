@@ -294,3 +294,4 @@ var defaultCorsHeaders = {
 
 exports.requestHandler = requestHandlerStub;
 exports.handler = requestHandler;
+
